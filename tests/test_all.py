@@ -10,7 +10,7 @@ sys.path.insert(0, myPath + '/../')
 
 from lvm_read import read
 
-def test_short_lvm():
+def test_short_lvm():   
     data = read('./data/pickle_only.lvm')
     np.testing.assert_equal(data[0]['data'][0,0],0.914018)
 
@@ -48,9 +48,13 @@ def timing_on_long_short_lvm():
     toc = time.time()
     print(f'Average time: {(toc-tic)/N:3.1f}s')
 
+def test_comma_separator():
+    data = read('./data/comma_separator.lvm', read_from_pickle=False, dump_file=False)
+    np.testing.assert_equal(data[0]['data'][0,1],-0.000424)
+
 if __name__ == '__mains__':
     np.testing.run_module_suite()
 
 if __name__ == '__main__':
-    test_several_comments()
+    test_comma_separator()
     #timing_on_long_short_lvm()
