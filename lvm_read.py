@@ -6,8 +6,9 @@ Author: Janko Slavič et al. (janko.slavic@fs.uni-lj.si)
 from os import path
 import pickle
 import numpy as np
+import io
 
-__version__ = '1.22'
+__version__ = '1.23'
 
 def _lvm_pickle(filename):
     """ Reads pickle file (for local use)
@@ -42,21 +43,15 @@ def _lvm_dump(lvm_data, filename, protocol=-1):
     pickle.dump(lvm_data, output, protocol=protocol)
     output.close()
 
-def get_separator(file):
-    separators = {'Tab': '\t',
-                  'Comma': ','
-    }
+def _get_separator(file):
+    separator = '\t'
     for line in file:
         if line.startswith('Separator'):
-            separator = line.strip()[10:]
+            separator = line.strip()[9]
             break
-    file.seek(0) 
-    if separator in separators.keys():
-        return separators[separator]
-    else:
-        raise Warning('No separator defined, using tabulator!')
-        return '\t'
-
+    if isinstance(file, io.IOBase):
+        file.seek(0) 
+    return separator
 
 def _read_lvm_base(filename):
     """ Base lvm reader. Should be called from ``read``, only
@@ -65,7 +60,7 @@ def _read_lvm_base(filename):
     :return lvm_data: lvm dict
     """
     with open(filename, 'r', encoding="utf8", errors='ignore') as f:
-        separator = get_separator(f)
+        separator = _get_separator(f)
         lvm_data = read_lines(f, separator=separator)
     return lvm_data
 
