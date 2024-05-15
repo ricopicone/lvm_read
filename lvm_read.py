@@ -45,10 +45,15 @@ def _lvm_dump(lvm_data, filename, protocol=-1):
 
 def _get_separator(file):
     separator = '\t'
+    i = 0
     for line in file:
         if line.startswith('Separator'):
             separator = line.strip()[9]
             break
+        if i>20: 
+            break
+        i+=1
+        
     if isinstance(file, io.IOBase):
         file.seek(0) 
     return separator
