@@ -6,8 +6,9 @@ Author: Janko Slavič et al. (janko.slavic@fs.uni-lj.si)
 from os import path
 import pickle
 import numpy as np
+import io
 
-__version__ = '1.21'
+__version__ = '1.23'
 
 def _lvm_pickle(filename):
     """ Reads pickle file (for local use)
@@ -42,6 +43,20 @@ def _lvm_dump(lvm_data, filename, protocol=-1):
     pickle.dump(lvm_data, output, protocol=protocol)
     output.close()
 
+def _get_separator(file):
+    separator = '\t'
+    i = 0
+    for line in file:
+        if line.startswith('Separator'):
+            separator = line.strip()[9]
+            break
+        if i>20: 
+            break
+        i+=1
+        
+    if isinstance(file, io.IOBase):
+        file.seek(0) 
+    return separator
 
 def _read_lvm_base(filename):
     """ Base lvm reader. Should be called from ``read``, only
@@ -50,11 +65,12 @@ def _read_lvm_base(filename):
     :return lvm_data: lvm dict
     """
     with open(filename, 'r', encoding="utf8", errors='ignore') as f:
-        lvm_data = read_lines(f)
+        separator = _get_separator(f)
+        lvm_data = read_lines(f, separator=separator)
     return lvm_data
 
 
-def read_lines(lines):
+def read_lines(lines, separator='\t'):
     """ Read lines of strings.
 
     :param lines: lines of the lvm file
@@ -76,10 +92,10 @@ def read_lines(lines):
             return np.nan
     for line in lines:
         line = line.replace('\r', '')
-        line_sp = line.replace('\n', '').split('\t')
+        line_sp = line.replace('\n', '').split(separator)
         if line_sp[0] in ['***End_of_Header***', 'LabVIEW Measurement']:
             continue
-        elif line in ['\n', '\t\n']:
+        elif line in ['\n', separator+'\n']:
             # segment finished, new segment follows
             segment = dict()
             lvm_data[segment_nr] = segment
