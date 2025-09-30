@@ -141,7 +141,7 @@ def read_lines(lines, separator='\t'):
         segment_nr -= 1
     lvm_data['Segments'] = segment_nr
     for s in range(segment_nr):
-        lvm_data[s]['data'] = np.asarray(lvm_data[s]['data'])
+        lvm_data[s]['data'] = np.asarray(lvm_data[s]['data'], dtype="object")
     return lvm_data
 
 
